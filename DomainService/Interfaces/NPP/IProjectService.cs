@@ -1,4 +1,5 @@
-﻿using Model.ResponseModel;
+﻿using Model.RequestModel;
+using Model.ResponseModel;
 
 namespace DomainService.Interfaces.NPP
 {
@@ -6,6 +7,6 @@ namespace DomainService.Interfaces.NPP
     {
         public ProjectResponse? GetById(Guid id);
 
-        public (int, List<ProjectResponse>) GetMany(int page, int pageSize);
+        public (int, List<ProjectResponse>) GetMany(KeywordWithPaginationRequest req);
     }
 }

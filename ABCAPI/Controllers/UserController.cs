@@ -34,9 +34,9 @@ namespace ABCAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetMany()
+        public IActionResult GetMany([FromQuery] KeywordWithPaginationRequest req)
         {
-            var (totalRecords, users) = _userService.GetMany();
+            var (totalRecords, users) = _userService.GetMany(req);
 
             return Ok(users, totalRecords);
         }

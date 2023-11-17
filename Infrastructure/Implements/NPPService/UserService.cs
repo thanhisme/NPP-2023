@@ -2,6 +2,7 @@
 using DomainService.Interfaces.ABC;
 using Entity.Entities;
 using Microsoft.Extensions.Caching.Memory;
+using Model.RequestModel;
 using Model.ResponseModel;
 
 namespace Infrastructure.Implements.NPPService
@@ -29,11 +30,14 @@ namespace Infrastructure.Implements.NPPService
             return user;
         }
 
-        public (int, List<UserResponse>) GetMany()
+        public (int, List<UserResponse>) GetMany(KeywordWithPaginationRequest req)
         {
+            bool isGuidForm = Guid.TryParse(req.Keyword, out Guid userId);
             var users = _unitOfWork
                 .Repository<NPPUser>()
-                .Where(user => !user.IsDeleted)
+                .Where(user => !user.IsDeleted &&
+                        isGuidForm ? user.Id == userId : user.FullName.Contains(req.Keyword.ToLower())
+                )
                 .Select(user => new UserResponse
                 {
                     Id = user.Id,
@@ -41,9 +45,11 @@ namespace Infrastructure.Implements.NPPService
                     Department = user.Department,
                     DepartmentId = user.DepartmentId,
                 })
-                .ToList();
+            .ToList();
 
-            return (users.Count, users);
+            int skip = (req.Page - 1) * req.PageSize;
+
+            return (users.Count, users.Skip(skip).Take(req.PageSize).ToList());
         }
     }
 }

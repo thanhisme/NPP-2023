@@ -2,6 +2,7 @@
 using DomainService.Interfaces.NPP;
 using Entity.Entities;
 using Microsoft.Extensions.Caching.Memory;
+using Model.RequestModel;
 using Model.ResponseModel;
 
 namespace Infrastructure.Implements.NPPService
@@ -28,10 +29,11 @@ namespace Infrastructure.Implements.NPPService
             return project;
         }
 
-        public (int, List<ProjectResponse>) GetMany(int page, int pageSize)
+        public (int, List<ProjectResponse>) GetMany(KeywordWithPaginationRequest req)
         {
             var projects = _unitOfWork
                 .Repository<NPPProject>()
+                .Where(project => project.Name.Contains(req.Keyword.ToLower()))
                 .Select(project => new ProjectResponse
                 {
                     Id = project.Id,
@@ -40,9 +42,9 @@ namespace Infrastructure.Implements.NPPService
                 })
                 .ToList();
 
-            int skip = (page - 1) * pageSize;
+            int skip = (req.Page - 1) * req.PageSize;
 
-            return (projects.Count, projects.Skip(skip).Take(pageSize).ToList());
+            return (projects.Count, projects.Skip(skip).Take(req.PageSize).ToList());
         }
     }
 }

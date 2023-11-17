@@ -2,6 +2,7 @@
 using DomainService.Interfaces.NPP;
 using Entity.Entities;
 using Microsoft.Extensions.Caching.Memory;
+using Model.RequestModel;
 
 namespace Infrastructure.Implements.NPPService
 {
@@ -11,15 +12,16 @@ namespace Infrastructure.Implements.NPPService
         {
         }
 
-        public (int, List<NPPDepartment>) GetMany(int page, int pageSize)
+        public (int, List<NPPDepartment>) GetMany(KeywordWithPaginationRequest req)
         {
             var departments = _unitOfWork
                 .Repository<NPPDepartment>()
+                .Where(department => department.Name!.Contains(req.Keyword.ToLower()))
                 .ToList();
 
-            int skip = (page - 1) * pageSize;
+            int skip = (req.Page - 1) * req.PageSize;
 
-            return (departments.Count, departments.Skip(skip).Take(pageSize).ToList());
+            return (departments.Count, departments.Skip(skip).Take(req.PageSize).ToList());
         }
     }
 }
